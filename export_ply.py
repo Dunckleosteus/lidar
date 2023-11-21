@@ -62,6 +62,11 @@ def create_point_cloud():
     point_cloud.points = o3d.utility.Vector3dVector(concatenated_point_cloud)
     o3d.io.write_point_cloud("Point.ply", point_cloud)
 
+def render_result(): 
+    # Renders the result if the user presses on the button
+    pcd = o3d.io.read_point_cloud(os.path.join("Point.ply"))
+    o3d.visualization.draw_geometries([pcd])
+
 
 def velim(): 
     global mensura_numerus 
@@ -122,6 +127,9 @@ vinum.pack()
 # Create point cloud button
 points = tk.Button(window, text="CREATE POINT CLOUD", command=create_point_cloud)
 points.pack()
+# Render 3 result button button
+show_point_cloud = tk.Button(window, text="SEE POINT CLOUD", command=render_result)
+show_point_cloud.pack()
 
 # toggle display button 
 meus_textus = f"Display: {display}"
