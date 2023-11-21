@@ -5,6 +5,9 @@ import open3d as o3d
 import tkinter as tk
 import os 
 import glob
+import pandas as pd 
+import numpy as np
+from tqdm import tqdm
 
 
 display = True # if the user wants to display 3 model after each measurement
@@ -33,6 +36,31 @@ def clear_folder():
         os.remove(f)
     mensura_numerus = 1
     print("All files cleared")
+
+def create_point_cloud():
+    path = os.path.join("mensura/")
+    np_coordinates_list = []
+    for file in tqdm(os.listdir(path)): 
+        distance = 1.4 * (int(file.split(".")[0]) -1) 
+        # open .ply file and save distances to numpy array
+        # TODO: add following code to loop
+        input_file = os.path.join(f"mensura/{file}")
+        myfile = open(input_file, 'r')
+        coordinates = []
+        for (num, line) in enumerate(myfile): 
+            if (num > 13) and (len(line.split())<=3) and (num%2 != 0):
+                x, y, z = line.split()
+                coordinates.append([float(x)+distance, float(y), float(z)])
+        # turning coordinates list in np array
+        np_coordinates = np.array(coordinates)
+        np_coordinates_list.append(np_coordinates)
+        # Creating a point cloud from data
+    # concatenating all the coordinates together
+    concatenated_point_cloud = np.concatenate((np_coordinates_list))
+
+    point_cloud = o3d.geometry.PointCloud()
+    point_cloud.points = o3d.utility.Vector3dVector(concatenated_point_cloud)
+    o3d.io.write_point_cloud("Point.ply", point_cloud)
 
 
 def velim(): 
@@ -91,6 +119,9 @@ crustulum.pack()
 # adding purge measurement files 
 vinum = tk.Button(window, text="Press to reset measures", command=clear_folder)
 vinum.pack()
+# Create point cloud button
+points = tk.Button(window, text="CREATE POINT CLOUD", command=create_point_cloud)
+points.pack()
 
 # toggle display button 
 meus_textus = f"Display: {display}"
